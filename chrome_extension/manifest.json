@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "Sourcy - 해외구매대행 자동화",
+  "version": "1.0.0",
+  "description": "해외 상품 소싱부터 국내 마켓 등록까지 자동화하는 Chrome 확장 프로그램",
+  "permissions": ["activeTab", "storage", "identity"],
+  "host_permissions": [
+    "https://*.taobao.com/*",
+    "https://*.tmall.com/*",
+    "https://*.aliexpress.com/*",
+    "https://*.1688.com/*",
+    "https://*.amazon.com/*"
+  ],
+  "background": {
+    "service_worker": "background/service_worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.taobao.com/item*",
+        "https://*.tmall.com/item*",
+        "https://*.aliexpress.com/item/*",
+        "https://*.1688.com/offer/*",
+        "https://*.amazon.com/dp/*",
+        "https://*.amazon.com/*/dp/*"
+      ],
+      "js": ["content/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon48.png",
+      "128": "assets/icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  }
+}
