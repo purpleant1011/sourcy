@@ -1,0 +1,234 @@
+# frozen_string_literal: true
+
+require 'rails_helper'
+
+RSpec.describe "Api::V1::ChromeExtensionAuth", type: :request do
+  describe "POST /api/v1/auth/token" do
+    context "with authorization code flow" do
+      let(:user) { create(:user) }
+      let(:account) { user.account }
+
+      before do
+        # Create authorization session (matching controller's create_auth_session)
+        @session_id = SecureRandom.uuid
+        auth_session = {
+          session_id: @session_id,
+          code_challenge: "test_challenge",
+          code_challenge_method: "plain",
+          redirect_uri: "https://sourcy.com/oauth/callback",
+          state: "test_state",
+          user_id: user.id,
+          created_at: Time.current,
+          expires_at: 5.minutes.from_now
+        }
+
+        # Store with same key format as controller
+        Rails.cache.write("oauth_code:#{@session_id}", auth_session, expires_in: 5.minutes)
+
+        # Use session_id as authorization code
+        @authorization_code = @session_id
+      end
+
+      it "exchanges authorization code for tokens" do
+        code = @authorization_code
+
+        post "/api/v1/auth/token", params: {
+          grant_type: "authorization_code",
+          code: code,
+          code_verifier: "test_challenge",
+          redirect_uri: "https://sourcy.com/oauth/callback",
+          client_id: "sourcy-chrome-extension"
+        }, as: :json
+
+        puts "Response status: #{response.status}"
+        puts "Response body: #{response.body}"
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+
+        expect(json["success"]).to be true
+        expect(json["data"]["access_token"]).to be_present
+        expect(json["data"]["refresh_token"]).to be_present
+        expect(json["data"]["expires_in"]).to eq(86400) # 24 hours
+        expect(json["data"]["user"]["id"]).to eq(user.id)
+        expect(json["data"]["user"]["email"]).to eq(user.email)
+      end
+
+      it "returns error for invalid authorization code" do
+        post "/api/v1/auth/token", params: {
+          grant_type: "authorization_code",
+          code: "invalid_code",
+          code_verifier: "test_challenge",
+          redirect_uri: "https://sourcy.com/oauth/callback",
+          client_id: "sourcy-chrome-extension"
+        }, as: :json
+
+        expect(response).to have_http_status(:unauthorized)
+        json = JSON.parse(response.body)
+
+        expect(json["success"]).to be false
+        expect(json["error"]["code"]).to eq("INVALID_GRANT")
+      end
+
+      it "returns error for missing required parameters" do
+        post "/api/v1/auth/token", params: {
+          grant_type: "authorization_code"
+        }, as: :json
+
+        expect(response).to have_http_status(:bad_request)
+        json = JSON.parse(response.body)
+
+        expect(json["success"]).to be false
+        expect(json["error"]["code"]).to eq("INVALID_REQUEST")
+      end
+    end
+
+    context "with refresh token flow" do
+      let(:user) { create(:user) }
+      let(:session) { user.sessions.create!(user_agent: "Sourcy Chrome Extension", ip_address: "127.0.0.1", purpose: "api_refresh", expires_at: 30.days.from_now) }
+
+      it "exchanges refresh token for new tokens" do
+        refresh_token = session.signed_id(purpose: "api_refresh")
+
+        post "/api/v1/auth/token", params: {
+          grant_type: "refresh_token",
+          refresh_token: refresh_token,
+          client_id: "sourcy-chrome-extension"
+        }, as: :json
+
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+
+        expect(json["success"]).to be true
+        expect(json["data"]["access_token"]).to be_present
+        expect(json["data"]["refresh_token"]).not_to eq(refresh_token) # Token rotation
+        expect(json["data"]["user"]["id"]).to eq(user.id)
+      end
+
+      it "rotates refresh token (old token is invalidated)" do
+        old_refresh_token = session.signed_id(purpose: "api_refresh")
+
+        post "/api/v1/auth/token", params: {
+          grant_type: "refresh_token",
+          refresh_token: old_refresh_token,
+          client_id: "sourcy-chrome-extension"
+        }, as: :json
+
+        json = JSON.parse(response.body)
+        new_refresh_token = json["data"]["refresh_token"]
+
+        # Try to use old refresh token again
+        post "/api/v1/auth/token", params: {
+          grant_type: "refresh_token",
+          refresh_token: old_refresh_token,
+          client_id: "sourcy-chrome-extension"
+        }, as: :json
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+
+      it "returns error for invalid refresh token" do
+        post "/api/v1/auth/token", params: {
+          grant_type: "refresh_token",
+          refresh_token: "invalid_refresh_token",
+          client_id: "sourcy-chrome-extension"
+        }, as: :json
+
+        expect(response).to have_http_status(:unauthorized)
+        json = JSON.parse(response.body)
+
+        expect(json["success"]).to be false
+        expect(json["error"]["code"]).to eq("INVALID_GRANT")
+      end
+    end
+
+    context "with unsupported grant type" do
+      it "returns error" do
+        post "/api/v1/auth/token", params: {
+          grant_type: "password",
+          username: "test",
+          password: "test"
+        }, as: :json
+
+        expect(response).to have_http_status(:bad_request)
+        json = JSON.parse(response.body)
+
+        expect(json["success"]).to be false
+        expect(json["error"]["code"]).to eq("UNSUPPORTED_GRANT_TYPE")
+      end
+    end
+  end
+
+  describe "DELETE /api/v1/auth/revoke" do
+    let(:user) { create(:user) }
+    let(:session) { user.sessions.create!(user_agent: "Sourcy Chrome Extension", ip_address: "127.0.0.1", purpose: "api_refresh", expires_at: 30.days.from_now) }
+
+    it "revokes refresh token" do
+      refresh_token = session.signed_id(purpose: "api_refresh")
+
+      delete "/api/v1/auth/revoke", params: {
+        token: refresh_token
+      }, as: :json
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+
+      expect(json["success"]).to be true
+      expect(json["data"]["revoked"]).to be true
+
+      # Verify session is destroyed
+      expect { Session.find(session.id) }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    it "returns error for missing token" do
+      delete "/api/v1/auth/revoke", params: {}, as: :json
+
+      expect(response).to have_http_status(:bad_request)
+      json = JSON.parse(response.body)
+
+      expect(json["success"]).to be false
+      expect(json["error"]["code"]).to eq("INVALID_REQUEST")
+    end
+  end
+
+  describe "GET /api/v1/auth/status" do
+    context "with valid token" do
+      let(:user) { create(:user) }
+      let(:session) { user.sessions.create!(user_agent: "Sourcy Chrome Extension", ip_address: "127.0.0.1", purpose: "api_refresh", expires_at: 30.days.from_now) }
+
+      it "returns authenticated status" do
+        payload = {
+          sub: user.id,
+          account_id: user.account_id,
+          sid: session.id,
+          iat: Time.current.to_i,
+          exp: 24.hours.from_now.to_i
+        }
+        token = JWT.encode(payload, Rails.application.credentials.jwt_secret || Rails.application.secret_key_base, "HS256")
+
+        get "/api/v1/auth/status", headers: {
+          "Authorization" => "Bearer #{token}"
+        }
+
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+
+        expect(json["success"]).to be true
+        expect(json["data"]["authenticated"]).to be true
+        expect(json["data"]["expires_at"]).to be_present
+      end
+    end
+
+    context "without token" do
+      it "returns unauthenticated status" do
+        get "/api/v1/auth/status"
+
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+
+        expect(json["success"]).to be true
+        expect(json["data"]["authenticated"]).to be false
+        expect(json["data"]["expires_at"]).to be_nil
+      end
+    end
+  end
+end

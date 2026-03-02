@@ -1,0 +1,81 @@
+/* Content script styles for Sourcy Chrome Extension */
+
+/* Extraction Button */
+#sourcy-extract-btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#sourcy-extract-btn svg {
+  flex-shrink: 0;
+}
+
+#sourcy-extract-btn span {
+  flex-shrink: 0;
+}
+
+/* Notification */
+#sourcy-notification {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  #sourcy-extract-btn {
+    border: 2px solid currentColor;
+  }
+
+  #sourcy-notification {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  #sourcy-extract-btn,
+  #sourcy-notification {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Dark mode support (optional - can be enabled per-site) */
+@media (prefers-color-scheme: dark) {
+  #sourcy-extract-btn {
+    background: #2563EB;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  #sourcy-extract-btn:hover {
+    background: #1D4ED8;
+  }
+
+  #sourcy-notification {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Ensure z-index is high enough */
+#sourcy-extract-btn,
+#sourcy-notification {
+  z-index: 2147483647 !important;
+}
+
+/* Prevent scroll when hovering */
+#sourcy-extract-btn:hover {
+  overflow: visible;
+}
+
+/* Accessibility */
+#sourcy-extract-btn:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+#sourcy-extract-btn span {
+  user-select: none;
+}

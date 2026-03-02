@@ -11,7 +11,7 @@ class User < ApplicationRecord
   has_many :api_credentials, dependent: :destroy
   has_many :audit_logs, dependent: :nullify
 
-  enum :role, { owner: 0, admin: 1, staff: 2, readonly: 3 }, default: :staff, validate: true, prefix: true
+  enum :role, { owner: 0, admin: 1, staff: 2, read_only: 3 }, default: :staff, validate: true
 
   encrypts :otp_secret
 

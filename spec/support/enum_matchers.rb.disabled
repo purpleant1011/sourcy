@@ -1,0 +1,22 @@
+# frozen_string_literal: true
+
+# Custom matcher for enum validation in Rails 8
+RSpec::Matchers.define :define_enum_for do |enum_name, enum_values = nil|
+  match do |actual|
+    # Check if the model has the enum defined
+    enum_values_hash = enum_values&.to_h || {}
+
+    # Check if the model responds to the enum values
+    actual.class.respond_to?(enum_name) &&
+      actual.class.send(enum_name).is_a?(Hash) &&
+      enum_values_hash.empty? || enum_values_hash.all? { |k, v| actual.class.send(enum_name).key?(k) && actual.class.send(enum_name)[k] == v }
+  end
+
+  failure_message do |actual|
+    "expected #{actual.class.name} to define enum #{enum_name.inspect}"
+  end
+
+  description do
+    "define enum #{enum_name.inspect}"
+  end
+end

@@ -34,7 +34,7 @@ module Auditable
       auditable_type: self.class.name,
       auditable_id: id,
       action: action,
-      changes: audited_changes,
+      audit_changes: audited_changes,
       ip_address: Current.ip_address
     )
   end

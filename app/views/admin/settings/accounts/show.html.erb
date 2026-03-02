@@ -1,0 +1,207 @@
+<%# frozen_string_literal: true %>
+
+<% content_for :title, "계정 설정" %>
+
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">계정 설정</h1>
+      <p class="text-sm text-gray-500 mt-1">계정 정보 및 설정을 관리하세요</p>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <%= turbo_frame_tag "settings_navigation" do %>
+    <nav class="flex space-x-4 border-b border-gray-200">
+      <%= link_to admin_accounts_path,
+                  class: "px-3 py-2 text-sm font-medium border-b-2 border-indigo-500 text-indigo-600" do %>
+        일반 정보
+      <% end %>
+      <%= link_to admin_teams_path,
+                  class: "px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700" do %>
+        팀 관리
+      <% end %>
+      <%= link_to admin_subscription_path,
+                  class: "px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700" do %>
+        구독 및 결제
+      <% end %>
+    </nav>
+  <% end %>
+
+  <!-- Account Details Form -->
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-6">
+      <%= form_with model: @account,
+                    url: admin_accounts_path,
+                    data: { turbo_frame: "account_form" },
+                    class: "space-y-6" do |f| %>
+
+        <!-- Company Information -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900">회사 정보</h3>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <%= f.label :name, "계정명", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :name,
+                              class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                              placeholder: "내 계정" %>
+            </div>
+
+            <div>
+              <%= f.label :company_name, "회사명", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :company_name,
+                              class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                              placeholder: "주식회사 소시" %>
+            </div>
+
+            <div>
+              <%= f.label :business_number, "사업자등록번호", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :business_number,
+                              class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                              placeholder: "123-45-67890" %>
+            </div>
+
+            <div>
+              <%= f.label :vat_number, "부가세 면세 번호", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :vat_number,
+                              class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                              placeholder: "선택 사항" %>
+            </div>
+          </div>
+
+          <div>
+            <%= f.label :address, "주소", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.text_area :address,
+                           rows: 2,
+                           class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                           placeholder: "회사 주소" %>
+          </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="space-y-4 pt-4 border-t border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">연락처 정보</h3>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <%= f.label :contact_phone, "전화번호", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.text_field :contact_phone,
+                              class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                              placeholder: "02-1234-5678" %>
+            </div>
+
+            <div>
+              <%= f.label :contact_email, "이메일", class: "block text-sm font-medium text-gray-700 mb-1" %>
+              <%= f.email_field :contact_email,
+                              class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                              placeholder: "contact@company.com" %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Business Type -->
+        <div class="space-y-4 pt-4 border-t border-gray-200">
+          <h3 class="text-lg font-medium text-gray-900">비즈니스 유형</h3>
+
+          <div>
+            <%= f.label :business_type, class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= f.select :business_type,
+                        options_for_select([
+                          ['개인 사업자', 'individual'],
+                          ['법인 사업자', 'corporate'],
+                          ['프리랜서', 'freelancer']
+                        ], @account.business_type),
+                        {},
+                        class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="pt-4 border-t border-gray-200 flex justify-end">
+          <%= f.submit "설정 저장",
+                       class: "inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Usage Statistics -->
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">사용량</h3>
+
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="text-sm text-gray-500">소스 제품</div>
+          <div class="mt-1 text-2xl font-semibold text-gray-900">
+            <%= number_with_delimiter(@usage_stats[:source_products_count]) %>
+          </div>
+        </div>
+
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="text-sm text-gray-500">카탈로그 제품</div>
+          <div class="mt-1 text-2xl font-semibold text-gray-900">
+            <%= number_with_delimiter(@usage_stats[:catalog_products_count]) %>
+          </div>
+        </div>
+
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="text-sm text-gray-500">마켓플레이스 게시</div>
+          <div class="mt-1 text-2xl font-semibold text-gray-900">
+            <%= number_with_delimiter(@usage_stats[:marketplace_listings_count]) %>
+          </div>
+        </div>
+
+        <div class="p-4 bg-gray-50 rounded-lg">
+          <div class="text-sm text-gray-500">주문</div>
+          <div class="mt-1 text-2xl font-semibold text-gray-900">
+            <%= number_with_delimiter(@usage_stats[:orders_count]) %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Credentials -->
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">API 자격 증명</h3>
+
+      <% if @api_credentials.any? %>
+        <div class="space-y-3">
+          <% @api_credentials.each do |credential| %>
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div>
+                <div class="font-medium text-gray-900">
+                  <%= credential.provider.humanize %>
+                </div>
+                <div class="text-sm text-gray-500">
+                  <%= credential.access_key.to_s.last(8).rjust(8, '•') %>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-1 text-xs font-medium rounded-full <%= credential.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                  <%= credential.is_active ? '활성' : '비활성' %>
+                </span>
+                <%= link_to edit_admin_settings_path,
+                            class: "text-indigo-600 hover:text-indigo-900 text-sm" do %>
+                  편집
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center py-8 text-gray-500">
+          API 자격 증명이 없습니다.
+          <br>
+          <%= link_to "API 자격 증명 추가",
+                      admin_settings_path,
+                      class: "text-indigo-600 hover:text-indigo-900 font-medium" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

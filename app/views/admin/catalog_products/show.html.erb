@@ -1,0 +1,234 @@
+<div class="mb-6">
+  <%= link_to admin_catalog_products_path,
+      class: 'inline-flex items-center text-sm text-gray-600 hover:text-gray-900',
+      data: { turbo: true } do %>
+    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+    </svg>
+    목록으로 돌아가기
+  <% end %>
+</div>
+
+<!-- 제품 상세 -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+  <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900"><%= @catalog_product.translated_title %></h1>
+      <p class="mt-1 text-sm text-gray-500">
+        원래: <%= @catalog_product.source_product&.original_title %>
+      </p>
+    </div>
+
+    <div class="flex gap-2">
+      <%= link_to '수정', edit_admin_catalog_product_path(@catalog_product),
+          class: 'px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700',
+          data: { turbo: true } %>
+      <%= link_to '삭제', admin_catalog_product_path(@catalog_product),
+          method: :delete,
+          data: { turbo_confirm: '정말 삭제하시겠습니까?', turbo_method: :delete },
+          class: 'px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700' %>
+    </div>
+  </div>
+
+  <div class="p-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- 기본 정보 -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900">기본 정보</h3>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">한글 제품명</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @catalog_product.translated_title %></p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">한글 설명</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @catalog_product.translated_description&.truncate(200) %></p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">판매가</label>
+            <p class="mt-1 text-sm text-gray-900">
+              <%= number_to_currency(@catalog_product.base_price_krw / 100.0, precision: 0, unit: '₩') %>
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">원가</label>
+            <p class="mt-1 text-sm text-gray-900">
+              <%= number_to_currency(@catalog_product.cost_price_krw / 100.0, precision: 0, unit: '₩') %>
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">마진율</label>
+          <p class="mt-1 text-sm <%= @catalog_product.margin_percent >= 30 ? 'text-green-600' : @catalog_product.margin_percent >= 20 ? 'text-yellow-600' : 'text-red-600' %>">
+            <%= @catalog_product.margin_percent %>%
+            <span class="text-gray-500 ml-2">
+              (<%= number_to_currency((@catalog_product.base_price_krw - @catalog_product.cost_price_krw) / 100.0, precision: 0, unit: '₩') %>)
+            </span>
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">상태</label>
+          <p class="mt-1">
+            <% case @catalog_product.status %>
+            <% when :listed %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                등록됨
+              </span>
+            <% when :paused %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                일시중지
+              </span>
+            <% else %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                초안
+              </span>
+            <% end %>
+          </p>
+        </div>
+      </div>
+
+      <!-- 인증 정보 -->
+      <div class="space-y-4">
+        <h3 class="text-lg font-semibold text-gray-900">인증 정보</h3>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">KC 인증</label>
+          <p class="mt-1">
+            <% case @catalog_product.kc_cert_status %>
+            <% when :approved %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                승인됨
+              </span>
+            <% when :exempted %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                면제대상
+              </span>
+            <% when :pending %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                검토 중
+              </span>
+            <% when :rejected %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                거부됨
+              </span>
+            <% else %>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                확인필요
+              </span>
+            <% end %>
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">위험 플래그</label>
+          <% if @catalog_product.risk_flags.any? %>
+            <div class="mt-1 space-y-1">
+              <% @catalog_product.risk_flags.each do |flag, value| %>
+                <p class="text-sm text-red-600">• <%= flag.humanize %></p>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="mt-1 text-sm text-gray-500">없음</p>
+          <% end %>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">브랜드</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @catalog_product.attributes.dig('brand') || '-' %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 이미지 -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <h3 class="text-lg font-semibold text-gray-900">이미지</h3>
+  </div>
+
+  <div class="p-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <% @catalog_product.processed_images.each do |image| %>
+        <div class="aspect-square rounded-lg overflow-hidden border border-gray-200">
+          <img src="<%= image[:original_image_url] %>"
+               class="w-full h-full object-cover"
+               alt="<%= @catalog_product.translated_title %>">
+        </div>
+      <% end %>
+
+      <% if @catalog_product.processed_images.empty? %>
+        <p class="text-sm text-gray-500 col-span-4 text-center py-8">이미지가 없습니다.</p>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- 리스팅 -->
+<div class="bg-white rounded-lg shadow-sm border border-gray-200">
+  <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+    <h3 class="text-lg font-semibold text-gray-900">마켓플레이스 리스팅</h3>
+
+    <%= link_to '새 리스팅 추가',
+        new_admin_marketplace_listing_path(catalog_product_id: @catalog_product.id),
+        class: 'px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700',
+        data: { turbo: true } %>
+  </div>
+
+  <div class="p-6">
+    <% listings = @catalog_product.marketplace_listings %>
+
+    <% if listings.any? %>
+      <div class="space-y-4">
+        <% listings.each do |listing| %>
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center">
+              <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                <span class="text-sm font-medium text-blue-800">
+                  <%= listing.marketplace.to_s.upcase.first(2) %>
+                </span>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900">
+                  <%= listing.marketplace.humanize %>
+                </p>
+                <p class="text-sm text-gray-500">
+                  <%= number_to_currency(listing.listing_price_krw / 100.0, precision: 0, unit: '₩') %>
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <% case listing.status %>
+              <% when :listed %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  등록됨
+                </span>
+              <% when :paused %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  일시중지
+                </span>
+              <% else %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  초안
+                </span>
+              <% end %>
+
+              <%= link_to '수정', edit_admin_marketplace_listing_path(listing),
+                  class: 'text-blue-600 hover:text-blue-900 text-sm ml-3',
+                  data: { turbo: true } %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-500 text-center py-4">등록된 리스팅이 없습니다.</p>
+    <% end %>
+  </div>
+</div>

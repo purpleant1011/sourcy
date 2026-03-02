@@ -1,0 +1,276 @@
+# frozen_string_literal: true
+
+module Api
+  module V1
+    class ChromeExtensionAuthController < BaseController
+      skip_before_action :authenticate_api!, only: %i[authorize token revoke]
+      skip_before_action :require_idempotency_key!, only: %i[authorize token revoke]
+
+      # OAuth2 PKCE Authorization Endpoint
+      # Chrome Extension에서 authorization code 발급을 요청
+      def authorize
+        # Chrome Extension client validation
+        return render_error(
+          code: "INVALID_CLIENT",
+          message: "Invalid client ID",
+          status: :unauthorized
+        ) unless valid_client?
+
+        # PKCE validation
+        code_challenge = params[:code_challenge]
+        return render_error(
+          code: "INVALID_REQUEST",
+          message: "Code challenge is required",
+          status: :bad_request
+        ) if code_challenge.blank?
+
+        # Redirect to authorization page (simplified flow)
+        # In production, show login page with PKCE flow
+        auth_session = create_auth_session(code_challenge)
+
+        redirect_to authorization_url(auth_session)
+      end
+
+      # OAuth2 Token Endpoint
+      # Authorization code를 access token으로 교환
+      def token
+        grant_type = params[:grant_type]
+
+        case grant_type
+        when 'authorization_code'
+          handle_authorization_code_flow
+        when 'refresh_token'
+          handle_refresh_token_flow
+        else
+          render_error(
+            code: "UNSUPPORTED_GRANT_TYPE",
+            message: "Unsupported grant type",
+            status: :bad_request
+          )
+        end
+      end
+
+      # OAuth2 Revoke Endpoint
+      # Access/Refresh token 폐기
+      def revoke
+        token = params[:token]
+        return render_error(
+          code: "INVALID_REQUEST",
+          message: "Token is required",
+          status: :bad_request
+        ) if token.blank?
+
+        # Revoke token by invalidating session
+        revoke_token!(token)
+
+        render_success(data: { revoked: true })
+      end
+
+      # Check current authentication status
+      # Chrome Extension popup에서 호출
+      def status
+        if Current.user.present? && Current.session.present?
+          render_success(data: {
+            authenticated: true,
+            expires_at: Current.session.expires_at&.to_i
+          })
+        else
+          render_success(data: {
+            authenticated: false,
+            expires_at: nil
+          })
+        end
+      end
+
+      private
+
+      # Validate Chrome Extension client ID
+      def valid_client?
+        client_id = params[:client_id]
+        client_id == 'sourcy-chrome-extension'
+      end
+
+      # Create authorization session for PKCE flow
+      def create_auth_session(code_challenge)
+        # Store PKCE parameters temporarily
+        auth_params = {
+          code_challenge: code_challenge,
+          code_challenge_method: params[:code_challenge_method] || 'plain',
+          redirect_uri: params[:redirect_uri],
+          state: params[:state],
+          created_at: Time.current,
+          expires_at: 10.minutes.from_now
+        }
+
+        # Store in encrypted session storage (simplified)
+        # In production, use Redis or database
+        session_id = SecureRandom.uuid
+        Rails.cache.write("oauth_auth:#{session_id}", auth_params, expires_in: 10.minutes)
+
+        { session_id: session_id }
+      end
+
+      # Build authorization URL
+      def authorization_url(auth_session)
+        # In production, redirect to login page with OAuth2 flow
+        # For now, return success with session info
+        "#{root_url}auth/chrome_extension?session_id=#{auth_session[:session_id]}"
+      end
+
+      # Handle authorization code flow
+      def handle_authorization_code_flow
+        code = params[:code]
+        code_verifier = params[:code_verifier]
+        redirect_uri = params[:redirect_uri]
+
+        return render_error(
+          code: "INVALID_REQUEST",
+          message: "Code and code verifier are required",
+          status: :bad_request
+        ) if code.blank? || code_verifier.blank?
+
+        # Verify code verifier against code challenge
+        auth_session = verify_code_challenge(code, code_verifier)
+        return render_error(
+          code: "INVALID_GRANT",
+          message: "Invalid authorization code",
+          status: :unauthorized
+        ) if auth_session.blank?
+
+        # Exchange code for user session (simplified)
+        # In production, verify OAuth2 authorization code
+        user = User.find_by(id: auth_session[:user_id])
+        return render_error(
+          code: "INVALID_GRANT",
+          message: "User not found",
+          status: :unauthorized
+        ) if user.blank?
+
+        # Create API session and issue tokens
+        session = create_api_session(user)
+        token_payload = issue_tokens_for(session)
+
+        # Clean up authorization session
+        Rails.cache.delete("oauth_auth:#{auth_session[:session_id]}")
+        Rails.cache.delete("oauth_code:#{code}")
+
+        render_success(data: token_payload)
+      end
+
+      # Handle refresh token flow
+      def handle_refresh_token_flow
+        refresh_token = params[:refresh_token]
+        return render_error(
+          code: "INVALID_REQUEST",
+          message: "Refresh token is required",
+          status: :bad_request
+        ) if refresh_token.blank?
+
+        # Verify refresh token
+        old_session = Session.find_signed_by_id(refresh_token, purpose: "api_refresh")
+        return render_error(
+          code: "INVALID_GRANT",
+          message: "Refresh token is invalid",
+          status: :unauthorized
+        ) if old_session.blank?
+
+        # Create new session (token rotation)
+        user = old_session.user
+        old_session.destroy!
+
+        new_session = create_api_session(user)
+
+        render_success(data: issue_tokens_for(new_session))
+      rescue ActiveSupport::MessageVerifier::InvalidSignature
+        render_error(
+          code: "INVALID_GRANT",
+          message: "Refresh token is invalid",
+          status: :unauthorized
+        )
+      end
+
+      # Verify PKCE code challenge
+      def verify_code_challenge(code, code_verifier)
+        # Retrieve authorization session
+        auth_params = Rails.cache.read("oauth_code:#{code}")
+        return nil if auth_params.blank?
+
+        # Verify code challenge
+        expected_challenge = case auth_params[:challenge_method]
+        when 'S256'
+          Digest::SHA256.base64digest(code_verifier)
+        else
+          code_verifier
+        end
+
+        return nil if expected_challenge != auth_params[:code_challenge]
+
+        auth_params
+      end
+
+      # Create API session for Chrome Extension
+      def create_api_session(user)
+        user.sessions.create!(
+          user_agent: "Sourcy Chrome Extension",
+          ip_address: request.remote_ip
+        )
+          purpose: "api_refresh",
+          expires_at: 30.days.from_now
+      end
+
+      # Issue JWT tokens
+      def issue_tokens_for(session)
+        user = session.user
+        expires_at = 24.hours.from_now
+        payload = {
+          sub: user.id,
+          account_id: user.account_id,
+          sid: session.id,
+          iat: Time.current.to_i,
+          exp: expires_at.to_i
+        }
+
+        {
+          access_token: JWT.encode(payload, jwt_secret, "HS256"),
+          refresh_token: session.signed_id(purpose: "api_refresh", expires_in: 30.days),
+          expires_in: 24.hours.to_i,
+          expires_at: expires_at.to_i,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            account_id: user.account_id
+          }
+        }
+      end
+
+      # Revoke token
+      def revoke_token!(token)
+        # Try to find session by refresh token
+        session = Session.find_signed_by_id(token, purpose: "api_refresh")
+        session&.destroy!
+
+        # Also check if it's a JWT access token
+        # Note: Access tokens are stateless, but we can invalidate session
+        begin
+          payload = JWT.decode(token, jwt_secret, true, algorithm: "HS256").first
+          session = Session.find_by(id: payload["sid"])
+          session&.destroy!
+        rescue JWT::DecodeError, JWT::ExpiredSignature
+          # Invalid token, ignore
+        end
+      end
+
+      # JWT secret
+      def jwt_secret
+        Rails.application.credentials.jwt_secret || Rails.application.secret_key_base
+      end
+
+      # Root URL
+      def root_url
+        request.protocol + request.host_with_port
+      end
+    end
+  end
+end

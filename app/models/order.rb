@@ -8,7 +8,7 @@ class Order < ApplicationRecord
   has_many :shipments, dependent: :destroy
   has_one :return_request, dependent: :destroy
 
-  enum :marketplace_platform, { coupang: 0, naver_smartstore: 1, eleven_street: 2 }, validate: true
+  enum :marketplace_platform, { coupang: 0, naver_smartstore: 1, eleven_street: 2, portone: 3, gmarket: 4 }, validate: true
   enum :order_status, { pending: 0, paid: 1, preparing: 2, shipped: 3, delivered: 4, canceled: 5, returned: 6 }, default: :pending, validate: true
 
   encrypts :buyer_name_ciphertext

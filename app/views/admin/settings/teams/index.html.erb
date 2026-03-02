@@ -1,0 +1,181 @@
+<%# frozen_string_literal: true %>
+
+<% content_for :title, "팀 관리" %>
+
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">팀 관리</h1>
+      <p class="text-sm text-gray-500 mt-1">팀 멤버를 관리하고 권한을 설정하세요</p>
+    </div>
+    <button type="button"
+            data-controller="modal"
+            data-action="click->modal#open"
+            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+      <%= heroicon 'user-plus', variant: :solid, class: "h-5 w-5 mr-2" %>
+      팀 멤버 추가
+    </button>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <%= turbo_frame_tag "settings_navigation" do %>
+    <nav class="flex space-x-4 border-b border-gray-200">
+      <%= link_to admin_accounts_path,
+                  class: "px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700" do %>
+        일반 정보
+      <% end %>
+      <%= link_to admin_teams_path,
+                  class: "px-3 py-2 text-sm font-medium border-b-2 border-indigo-500 text-indigo-600" do %>
+        팀 관리
+      <% end %>
+      <%= link_to admin_subscription_path,
+                  class: "px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700" do %>
+        구독 및 결제
+      <% end %>
+    </nav>
+  <% end %>
+
+  <!-- Team Members List -->
+  <div class="bg-white rounded-lg shadow">
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">팀 멤버 (<%= @memberships.count %>)</h3>
+
+      <% if @memberships.any? %>
+        <div class="space-y-4">
+          <% @memberships.each do |membership| %>
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div class="flex items-center space-x-4">
+                <!-- Avatar -->
+                <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                  <span class="text-sm font-medium text-indigo-600">
+                    <%= membership.user.email.first.upcase %>
+                  </span>
+                </div>
+
+                <!-- User Info -->
+                <div>
+                  <div class="font-medium text-gray-900">
+                    <%= membership.user.email %>
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    <%= membership.user.name || '이름 없음' %>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Role & Actions -->
+              <div class="flex items-center space-x-4">
+                <div>
+                  <%= form_with model: membership,
+                                url: admin_team_path(membership),
+                                data: { turbo_frame: "membership_#{membership.id}" },
+                                class: "flex items-center space-x-2" do |f| %>
+                    <%= f.select :role,
+                                options_for_select([
+                                  ['오너', 'owner'],
+                                  ['관리자', 'admin'],
+                                  ['멤버', 'member'],
+                                  ['뷰어', 'viewer']
+                                ], membership.role),
+                                {},
+                                class: "rounded-md border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500",
+                                disabled: membership.user == Current.user || membership.role == 'owner' %>
+                  <% end %>
+                </div>
+
+                <% unless membership.user == Current.user || membership.role == 'owner' %>
+                  <%= link_to admin_team_path(membership),
+                              method: :delete,
+                              data: { turbo_confirm: "정말 #{membership.user.email}를 팀에서 제거하시겠습니까?" },
+                              class: "text-red-600 hover:text-red-900 text-sm" do %>
+                    제거
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center py-12 text-gray-500">
+          <%= heroicon 'users', variant: :outline, class: "mx-auto h-12 w-12 text-gray-400" %>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">팀 멤버가 없습니다</h3>
+          <p class="mt-1 text-sm text-gray-500">
+            첫 번째 팀 멤버를 추가하여 팀을 구성해보세요.
+          </p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Add Member Modal -->
+  <%= turbo_frame_tag "add_member_modal" do %>
+    <div id="add_member_modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+              팀 멤버 추가
+            </h3>
+
+            <div class="mt-4 space-y-4">
+              <%= form_with model: Membership.new,
+                            url: admin_teams_path,
+                            data: { turbo_frame: "add_member_modal" },
+                            class: "space-y-4" do |f| %>
+
+                <div>
+                  <%= f.label :email, "이메일 주소", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                  <%= f.email_field :email,
+                                  required: true,
+                                  class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm",
+                                  placeholder: "user@example.com" %>
+                  <p class="mt-1 text-sm text-gray-500">
+                    이미 Sourcy 계정이 있어야 합니다.
+                  </p>
+                </div>
+
+                <div>
+                  <%= f.label :role, "역할", class: "block text-sm font-medium text-gray-700 mb-1" %>
+                  <%= f.select :role,
+                              options_for_select([
+                                ['오너', 'owner'],
+                                ['관리자', 'admin'],
+                                ['멤버', 'member'],
+                                ['뷰어', 'viewer']
+                              ]),
+                              { selected: 'member' },
+                              class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+                </div>
+
+                <div class="flex items-center">
+                  <%= f.check_box :send_invitation,
+                                 checked: true,
+                                 class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
+                  <%= f.label :send_invitation,
+                              "초대 이메일 보내기",
+                              class: "ml-2 block text-sm text-gray-900" %>
+                </div>
+
+                <div class="pt-4 flex justify-end space-x-3">
+                  <button type="button"
+                          data-controller="modal"
+                          data-action="click->modal#close"
+                          class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    취소
+                  </button>
+                  <%= f.submit "추가",
+                               class: "inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

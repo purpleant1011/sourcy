@@ -16,6 +16,10 @@ default: &default
       threads: 3
       processes: 1
       polling_interval: 0.5
+    - queues: "image_processing"
+      threads: 4
+      processes: 2
+      polling_interval: 0.1
 
 development:
   <<: *default

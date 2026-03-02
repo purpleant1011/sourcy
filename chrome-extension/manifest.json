@@ -1,0 +1,65 @@
+{
+  "manifest_version": 3,
+  "name": "Sourcy - 크로스보더 이커머스 수집",
+  "version": "1.0.0",
+  "version_name": "1.0.0",
+  "description": "중국 이커머스(Taobao, AliExpress, 1688, Amazon)에서 제품을 수집하여 한국 마켓플레이스(Naver SmartStore, Coupang, Gmarket, 11st)에 발행",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "identity",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://*.taobao.com/*",
+    "https://*.tmall.com/*",
+    "https://*.1688.com/*",
+    "https://*.aliexpress.com/*",
+    "https://*.amazon.com/*",
+    "https://*.amazon.co.jp/*",
+    "https://*.amazon.co.uk/*",
+    "*://*.naver.com/*",
+    "*://*.coupang.com/*"
+  ],
+  "background": {
+    "service_worker": "background/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.taobao.com/*",
+        "https://*.tmall.com/*",
+        "https://*.1688.com/*",
+        "https://*.aliexpress.com/*",
+        "https://*.amazon.com/*",
+        "https://*.amazon.co.jp/*",
+        "https://*.amazon.co.uk/*"
+      ],
+      "js": ["content/content.js"],
+      "css": ["content/content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["popup/*", "content/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

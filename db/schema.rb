@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_01_170028) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_02_014619) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -26,6 +26,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_170028) do
     t.index ["owner_id"], name: "index_accounts_on_owner_id"
     t.index ["plan"], name: "index_accounts_on_plan"
     t.index ["slug"], name: "index_accounts_on_slug", unique: true
+  end
+
+  create_table "alerts", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "severity"
+    t.string "source"
+    t.string "title"
+    t.datetime "updated_at", null: false
   end
 
   create_table "api_credentials", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -45,9 +54,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_170028) do
   create_table "audit_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "account_id", null: false
     t.string "action", null: false
+    t.jsonb "audit_changes", default: {}, null: false
     t.uuid "auditable_id", null: false
     t.string "auditable_type", null: false
-    t.jsonb "changes", default: {}, null: false
     t.datetime "created_at", null: false
     t.inet "ip_address"
     t.datetime "updated_at", null: false
@@ -305,7 +314,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_170028) do
 
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.datetime "expires_at"
     t.inet "ip_address"
+    t.string "purpose"
     t.datetime "updated_at", null: false
     t.string "user_agent"
     t.uuid "user_id", null: false
@@ -332,17 +343,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_170028) do
     t.uuid "account_id", null: false
     t.datetime "collected_at"
     t.datetime "created_at", null: false
+    t.jsonb "images"
     t.string "original_currency", default: "CNY", null: false
     t.text "original_description"
     t.jsonb "original_images", default: [], null: false
     t.bigint "original_price_cents", null: false
     t.string "original_title", null: false
     t.jsonb "raw_data", default: {}, null: false
+    t.string "shop_name"
     t.string "source_id", null: false
     t.integer "source_platform", null: false
     t.string "source_url", null: false
+    t.jsonb "specifications"
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.jsonb "variants_data"
     t.index "to_tsvector('simple'::regconfig, (COALESCE(original_title, ''::character varying))::text)", name: "index_source_products_on_original_title_tsv", using: :gin
     t.index ["account_id", "source_platform", "source_id"], name: "idx_source_products_account_source_uid", unique: true
     t.index ["account_id", "status"], name: "index_source_products_on_account_id_and_status"
@@ -364,6 +379,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_170028) do
     t.index ["account_id", "external_subscription_id"], name: "index_subscriptions_on_account_id_and_external_subscription_id", unique: true
     t.index ["account_id", "status"], name: "index_subscriptions_on_account_id_and_status"
     t.index ["account_id"], name: "index_subscriptions_on_account_id"
+  end
+
+  create_table "support_tickets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "account_id"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.uuid "order_id"
+    t.integer "priority"
+    t.string "source"
+    t.integer "status"
+    t.string "subject"
+    t.datetime "updated_at", null: false
+    t.uuid "user_id"
   end
 
   create_table "tracking_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -460,6 +488,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_170028) do
   add_foreign_key "shipments", "orders"
   add_foreign_key "source_products", "accounts"
   add_foreign_key "subscriptions", "accounts"
+  add_foreign_key "support_tickets", "accounts", on_delete: :nullify
+  add_foreign_key "support_tickets", "orders", on_delete: :nullify
+  add_foreign_key "support_tickets", "users", on_delete: :nullify
   add_foreign_key "tracking_events", "shipments"
   add_foreign_key "translation_runs", "extraction_runs"
   add_foreign_key "users", "accounts"

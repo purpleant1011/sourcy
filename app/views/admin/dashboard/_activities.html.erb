@@ -1,0 +1,25 @@
+<% if activities.present? %>
+  <div class="space-y-3">
+    <% activities.each do |activity| %>
+      <div class="flex items-start space-x-3 p-3 bg-white rounded-lg border border-gray-200">
+        <div class="flex-shrink-0">
+          <span class="inline-flex items-center justify-center h-8 w-8 rounded-full <%= activity_color(activity.action_type) %>">
+            <%= activity_icon(activity.action_type) %>
+          </span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900">
+            <%= activity_display_text(activity) %>
+          </p>
+          <p class="text-xs text-gray-500 mt-1">
+            <%= l(activity.created_at, format: :short) %>
+          </p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="text-center py-8">
+    <p class="text-sm text-gray-500">최근 활동이 없습니다.</p>
+  </div>
+<% end %>
