@@ -369,7 +369,7 @@ GEM
     omniauth-oauth2 (1.9.0)
       oauth2 (>= 2.0.2, < 3)
       omniauth (~> 2.0)
-    omniauth-rails_csrf_protection (1.0.2)
+    omniauth-rails_csrf_protection (2.0.1)
       actionpack (>= 4.2)
       omniauth (~> 2.0)
     os (1.1.4)
@@ -652,7 +652,7 @@ DEPENDENCIES
   omniauth-google-oauth2 (~> 1.1)
   omniauth-kakao
   omniauth-naver
-  omniauth-rails_csrf_protection (~> 1.0)
+  omniauth-rails_csrf_protection (~> 2.0)
   pagy (~> 9.0)
   pg (~> 1.1)
   propshaft
