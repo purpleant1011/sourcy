@@ -2,10 +2,7 @@
 
 module Admin
   class OrdersController < Admin::BaseController
-    # layout 'admin'
-    # allow_unauthenticated_access
-    # before_action :require_basic_auth
-    before_action :set_order, only: [:show, :update]
+    before_action :set_order, only: [ :show, :update ]
 
     def index
       @orders = Current.account ? Current.account.orders : Order.all
@@ -13,10 +10,7 @@ module Admin
       # 필터링
       if params[:search].present?
         search_term = "%#{params[:search]}%"
-        @orders = @orders.where(
-          'order_number ILIKE ? OR customer_name ILIKE ? OR customer_email ILIKE ?',
-          search_term, search_term, search_term
-        )
+        @orders = @orders.where("external_order_id ILIKE ?", search_term)
       end
 
       if params[:status].present?
@@ -26,16 +20,15 @@ module Admin
       # 날짜 범위 필터링
       if params[:date_range].present?
         case params[:date_range]
-        when '7d'
-          @orders = @orders.where('created_at >= ?', 7.days.ago)
-        when '30d'
-          @orders = @orders.where('created_at >= ?', 30.days.ago)
-        when '90d'
-          @orders = @orders.where('created_at >= ?', 90.days.ago)
+        when "7d"
+          @orders = @orders.where("created_at >= ?", 7.days.ago)
+        when "30d"
+          @orders = @orders.where("created_at >= ?", 30.days.ago)
+        when "90d"
+          @orders = @orders.where("created_at >= ?", 90.days.ago)
         end
       end
 
-      # 페이지네이션
       # 페이지네이션
       page = (params[:page] || 1).to_i
       @pagy, @orders = pagy(@orders.order(created_at: :desc), limit: 20, page: page)
@@ -48,11 +41,14 @@ module Admin
     end
 
     def update
-      status = params.dig(:order, :status)
-      return render json: { success: false, error: 'Invalid status' } unless Order.statuses.include?(status)
+      status = params.dig(:order, :order_status)
+      unless status.present? && Order.order_statuses.key?(status)
+        redirect_to admin_order_path(@order), alert: "유효하지 않은 상태입니다."
+        return
+      end
 
-      if @order.update(status: status)
-        redirect_to admin_order_path(@order), notice: '주문 상태가 업데이트되었습니다.'
+      if @order.update(order_status: status)
+        redirect_to admin_order_path(@order), notice: "주문 상태가 업데이트되었습니다."
       else
         render :show, status: :unprocessable_entity
       end
@@ -63,11 +59,11 @@ module Admin
     def set_order
       @order = Current.account ? Current.account.orders.find(params[:id]) : Order.find(params[:id])
     rescue ActiveRecord::RecordNotFound
-      redirect_to admin_orders_path, alert: '주문을 찾을 수 없습니다.'
+      redirect_to admin_orders_path, alert: "주문을 찾을 수 없습니다."
     end
 
     def order_params
-      params.require(:order).permit(:status)
+      params.require(:order).permit(:order_status)
     end
   end
 end

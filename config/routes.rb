@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  root "dashboard#index"
+  root "pages#index"
 
   # Chrome Extension OAuth2
   get "auth/chrome_extension", to: "auth#chrome_extension", as: :chrome_extension_auth

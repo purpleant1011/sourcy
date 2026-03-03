@@ -1,0 +1,223 @@
+<%# Landing page - no layout wrapper, full page control %>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sourcy - 해외 소싱부터 국내 판매까지</title>
+  <%= csrf_meta_tags %>
+  <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0;">
+
+<%# ──────────────── NAVBAR ──────────────── %>
+<nav style="position: fixed; top: 0; left: 0; right: 0; z-index: 50; background: rgba(15,23,42,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,255,255,0.08);">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px;">
+    <div style="font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px;">
+      <span style="color: #3b82f6;">S</span>ourcy
+    </div>
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <a href="/admin" style="font-size: 14px; color: rgba(255,255,255,0.7); text-decoration: none; padding: 8px 16px; border-radius: 8px; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">관리자</a>
+      <a href="<%= new_session_path %>" style="font-size: 14px; font-weight: 600; color: #fff; text-decoration: none; background: #3b82f6; padding: 9px 20px; border-radius: 8px; transition: background 0.2s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">로그인</a>
+    </div>
+  </div>
+</nav>
+
+<%# ──────────────── HERO ──────────────── %>
+<section style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 40%, #0f172a 100%); padding: 140px 24px 100px; min-height: 100vh; display: flex; align-items: center;">
+  <div style="max-width: 1200px; margin: 0 auto; width: 100%; display: flex; align-items: center; gap: 80px;">
+    <div style="flex: 1; min-width: 0;">
+      <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); border-radius: 100px; padding: 6px 16px; margin-bottom: 28px;">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: #3b82f6; display: inline-block;"></span>
+        <span style="font-size: 13px; color: #93c5fd; font-weight: 500;">해외 소싱 자동화 플랫폼</span>
+      </div>
+      <h1 style="font-size: 52px; font-weight: 800; color: #fff; line-height: 1.15; letter-spacing: -1.5px; margin: 0 0 24px;">
+        해외 소싱부터<br>
+        <span style="background: linear-gradient(90deg, #3b82f6, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">국내 판매까지</span>,<br>
+        한 번에
+      </h1>
+      <p style="font-size: 18px; color: rgba(255,255,255,0.65); line-height: 1.7; margin: 0 0 40px; max-width: 520px;">
+        Sourcy는 타오바오·알리익스프레스 상품을 <strong style="color: rgba(255,255,255,0.9);">자동으로 번역·최적화</strong>해서 네이버 스마트스토어, 쿠팡, 11번가에 <strong style="color: rgba(255,255,255,0.9);">동시 등록·관리</strong>합니다.
+      </p>
+      <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <a href="<%= new_session_path %>" style="font-size: 15px; font-weight: 700; color: #fff; text-decoration: none; background: #3b82f6; padding: 14px 32px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 20px rgba(59,130,246,0.4);" onmouseover="this.style.background='#2563eb';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#3b82f6';this.style.transform='translateY(0)'">
+          무료로 시작하기
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+        <a href="/admin" style="font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.8); text-decoration: none; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); padding: 14px 32px; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          관리자 데모
+        </a>
+      </div>
+      <div style="display: flex; align-items: center; gap: 24px; margin-top: 48px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.08);">
+        <div style="text-align: center;">
+          <div style="font-size: 28px; font-weight: 800; color: #fff;">3개</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px;">마켓플레이스</div>
+        </div>
+        <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1);"></div>
+        <div style="text-align: center;">
+          <div style="font-size: 28px; font-weight: 800; color: #fff;">80%</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px;">업무 시간 절약</div>
+        </div>
+        <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1);"></div>
+        <div style="text-align: center;">
+          <div style="font-size: 28px; font-weight: 800; color: #fff;">99.9%</div>
+          <div style="font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 2px;">업타임</div>
+        </div>
+      </div>
+    </div>
+
+    <%# Dashboard Mockup SVG %>
+    <div style="flex: 0 0 480px; display: flex; justify-content: center; align-items: center;">
+      <div style="width: 460px; background: #1e293b; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 25px 60px rgba(0,0,0,0.5); overflow: hidden;">
+        <%# Mockup topbar %>
+        <div style="background: #0f172a; padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: #ff5f57;"></div>
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e;"></div>
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: #28c840;"></div>
+          <div style="margin-left: 8px; font-size: 11px; color: rgba(255,255,255,0.3);">Sourcy Admin</div>
+        </div>
+        <%# Mockup content %>
+        <div style="display: flex; height: 280px;">
+          <%# Sidebar %>
+          <div style="width: 120px; background: #0f172a; border-right: 1px solid rgba(255,255,255,0.06); padding: 16px 0;">
+            <% [['대시보드', true], ['제품', false], ['리스팅', false], ['주문', false], ['정산', false]].each do |label, active| %>
+              <div style="padding: 8px 12px; margin: 2px 8px; border-radius: 6px; font-size: 11px; color: <%= active ? '#3b82f6' : 'rgba(255,255,255,0.4)' %>; background: <%= active ? 'rgba(59,130,246,0.15)' : 'transparent' %>; font-weight: <%= active ? '600' : '400' %>;">
+                <%= label %>
+              </div>
+            <% end %>
+          </div>
+          <%# Main content %>
+          <div style="flex: 1; padding: 16px;">
+            <div style="font-size: 12px; color: #fff; font-weight: 600; margin-bottom: 12px;">대시보드</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+              <% [['128', '총 상품'], ['34', '활성 리스팅'], ['12', '오늘 주문'], ['3', '대기 작업']].each do |num, label| %>
+                <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px;">
+                  <div style="font-size: 18px; font-weight: 700; color: #fff;"><%= num %></div>
+                  <div style="font-size: 9px; color: rgba(255,255,255,0.4); margin-top: 2px;"><%= label %></div>
+                </div>
+              <% end %>
+            </div>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px;">
+              <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 8px;">최근 주문</div>
+              <% 3.times do |i| %>
+                <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                  <div style="font-size: 9px; color: rgba(255,255,255,0.5);">주문 #00<%= 10 + i %></div>
+                  <div style="font-size: 9px; color: #34d399;">완료</div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# ──────────────── FEATURES ──────────────── %>
+<section style="background: #f8fafc; padding: 100px 24px;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 64px;">
+      <h2 style="font-size: 40px; font-weight: 800; color: #0f172a; letter-spacing: -1px; margin: 0 0 16px;">핵심 기능</h2>
+      <p style="font-size: 18px; color: #64748b; margin: 0;">복잡한 해외 소싱 프로세스를 완전 자동화합니다</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
+      <% [
+        { icon: '🔍', title: '자동 상품 수집', desc: 'Chrome Extension으로 타오바오, 알리익스프레스에서 상품 정보를 1클릭으로 수집합니다. 이미지, 가격, 스펙까지 자동 저장.', color: '#eff6ff', border: '#bfdbfe', accent: '#3b82f6' },
+        { icon: '🌐', title: 'AI 번역·최적화', desc: 'Google Vision OCR과 네이버 Papago로 중국어를 한국어로 자동 번역. AI가 SEO에 최적화된 상품명을 생성합니다.', color: '#f0fdf4', border: '#bbf7d0', accent: '#16a34a' },
+        { icon: '🛒', title: '멀티마켓 자동 등록', desc: '네이버 스마트스토어, 쿠팡, 11번가에 동시 등록. 재고·가격 변동을 실시간으로 모든 마켓에 자동 동기화합니다.', color: '#faf5ff', border: '#e9d5ff', accent: '#9333ea' }
+      ].each do |f| %>
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 36px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 1px 4px rgba(0,0,0,0.05)'">
+          <div style="width: 56px; height: 56px; background: <%= f[:color] %>; border: 1px solid <%= f[:border] %>; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 24px;">
+            <%= f[:icon] %>
+          </div>
+          <h3 style="font-size: 20px; font-weight: 700; color: #0f172a; margin: 0 0 12px;"><%= f[:title] %></h3>
+          <p style="font-size: 15px; color: #64748b; line-height: 1.7; margin: 0;"><%= f[:desc] %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<%# ──────────────── WORKFLOW ──────────────── %>
+<section style="background: #fff; padding: 100px 24px;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 64px;">
+      <h2 style="font-size: 40px; font-weight: 800; color: #0f172a; letter-spacing: -1px; margin: 0 0 16px;">이렇게 작동합니다</h2>
+    </div>
+    <div style="display: flex; align-items: flex-start; justify-content: center; gap: 0;">
+      <% [
+        { step: '1', title: '상품 발견', desc: '타오바오/알리 쇼핑하다가 마음에 드는 상품 발견' },
+        { step: '2', title: '1클릭 수집', desc: 'Chrome Extension으로 클릭 한 번에 Sourcy에 저장' },
+        { step: '3', title: '자동 번역', desc: 'AI가 중국어 상품명/설명을 한국어로 최적화 번역' },
+        { step: '4', title: '마켓 등록', desc: '네이버·쿠팡·11번가에 동시 자동 등록 완료' }
+      ].each_with_index do |s, i| %>
+        <div style="display: flex; align-items: center;">
+          <div style="text-align: center; width: 200px;">
+            <div style="width: 56px; height: 56px; background: #0f172a; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 20px; font-weight: 800; color: #fff;"><%= s[:step] %></div>
+            <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 8px;"><%= s[:title] %></h4>
+            <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;"><%= s[:desc] %></p>
+          </div>
+          <% unless i == 3 %>
+            <div style="flex: 1; height: 2px; background: linear-gradient(90deg, #0f172a, #3b82f6); margin: 0 8px; position: relative; top: -28px;">
+              <div style="position: absolute; right: -6px; top: -5px; color: #3b82f6; font-size: 14px;">▶</div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<%# ──────────────── MARKETPLACES ──────────────── %>
+<section style="background: #f8fafc; padding: 64px 24px;">
+  <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+    <p style="font-size: 14px; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 32px;">지원 마켓플레이스</p>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 48px; flex-wrap: wrap;">
+      <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 36px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="font-size: 18px; font-weight: 800; color: #03c75a;">N</div>
+        <div style="font-size: 13px; color: #475569; font-weight: 600; margin-top: 4px;">네이버 스마트스토어</div>
+      </div>
+      <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 36px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="font-size: 18px; font-weight: 800; color: #ea1e2c;">C</div>
+        <div style="font-size: 13px; color: #475569; font-weight: 600; margin-top: 4px;">쿠팡</div>
+      </div>
+      <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px 36px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div style="font-size: 18px; font-weight: 800; color: #e73b2b;">11</div>
+        <div style="font-size: 13px; color: #475569; font-weight: 600; margin-top: 4px;">11번가</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.6); border: 1px dashed #cbd5e1; border-radius: 16px; padding: 20px 36px;">
+        <div style="font-size: 18px; font-weight: 800; color: #94a3b8;">+</div>
+        <div style="font-size: 13px; color: #94a3b8; font-weight: 500; margin-top: 4px;">추가 예정</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# ──────────────── CTA ──────────────── %>
+<section style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 100px 24px; text-align: center;">
+  <div style="max-width: 600px; margin: 0 auto;">
+    <h2 style="font-size: 42px; font-weight: 800; color: #fff; letter-spacing: -1px; margin: 0 0 20px;">지금 바로 시작하세요</h2>
+    <p style="font-size: 18px; color: rgba(255,255,255,0.6); margin: 0 0 40px; line-height: 1.6;">소싱 시간을 80% 줄이고 더 많은 상품을 더 빠르게 판매하세요.</p>
+    <a href="<%= new_session_path %>" style="font-size: 16px; font-weight: 700; color: #fff; text-decoration: none; background: #3b82f6; padding: 16px 40px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 20px rgba(59,130,246,0.4); transition: all 0.2s;" onmouseover="this.style.background='#2563eb';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#3b82f6';this.style.transform='translateY(0)'">
+      Sourcy 시작하기 →
+    </a>
+  </div>
+</section>
+
+<%# ──────────────── FOOTER ──────────────── %>
+<footer style="background: #0f172a; padding: 32px 24px; border-top: 1px solid rgba(255,255,255,0.06);">
+  <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+    <div style="font-size: 18px; font-weight: 800; color: #fff;">
+      <span style="color: #3b82f6;">S</span>ourcy
+    </div>
+    <div style="font-size: 13px; color: rgba(255,255,255,0.35);">© 2026 Sourcy. All rights reserved.</div>
+    <div style="display: flex; gap: 24px;">
+      <a href="<%= new_session_path %>" style="font-size: 13px; color: rgba(255,255,255,0.5); text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">로그인</a>
+      <a href="/admin" style="font-size: 13px; color: rgba(255,255,255,0.5); text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">관리자</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

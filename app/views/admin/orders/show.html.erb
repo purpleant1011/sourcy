@@ -1,11 +1,9 @@
 <div class="mb-6">
-  <%= link_to admin_orders_path,
-      class: 'inline-flex items-center text-sm text-gray-600 hover:text-gray-900',
-      data: { turbo: true } do %>
+  <%= link_to admin_orders_path, class: 'inline-flex items-center text-sm text-gray-600 hover:text-gray-900' do %>
     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
     </svg>
-    목록으로 돌아가기
+    <span>목록으로 돌아가기</span>
   <% end %>
 </div>
 
@@ -13,111 +11,85 @@
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
   <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">주문 <%= @order.order_number %></h1>
+      <h1 class="text-2xl font-bold text-gray-900">주문 #<%= @order.external_order_id %></h1>
       <p class="mt-1 text-sm text-gray-500">
-        <%= @order.created_at.strftime('%Y년 %m월 %d일 %H:%M') %>
+        <%= @order.ordered_at.strftime('%Y년 %m월 %d일 %H:%M') %>
       </p>
     </div>
 
-    <div class="flex gap-2">
-      <%= form_with model: @order, url: admin_order_path(@order), method: :patch, local: true do |f| %>
-        <%= f.select :status,
-            options_for_select(Order.statuses.map { |k, v| [k.humanize, k] }, @order.status),
-            { class: 'rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-4 py-2' } %>
-        <%= f.submit '업데이트', class: 'ml-2 px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700' %>
+    <div class="flex gap-2 items-center">
+      <%= form_with model: @order, url: admin_order_path(@order), method: :patch, local: true, class: 'flex items-center gap-2' do |f| %>
+        <%= f.select :order_status,
+            options_for_select(Order.order_statuses.map { |k, _v| [k.humanize, k] }, @order.order_status),
+            {},
+            class: 'rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2' %>
+        <%= f.submit '업데이트', class: 'px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 cursor-pointer' %>
       <% end %>
     </div>
   </div>
 
   <div class="p-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-2 gap-6">
       <!-- 주문 정보 -->
       <div class="space-y-4">
         <h3 class="text-lg font-semibold text-gray-900">주문 정보</h3>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">상태</label>
+          <label class="block text-sm font-medium text-gray-500">상태</label>
           <p class="mt-1">
-            <% case @order.status %>
-            <% when :pending %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                대기
-              </span>
-            <% when :confirmed %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                확정
-              </span>
-            <% when :shipped %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                배송중
-              </span>
-            <% when :delivered %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                배송완료
-              </span>
-            <% when :cancelled %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                취소
-              </span>
-            <% when :refunded %>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                환불
-              </span>
-            <% end %>
+            <% status_classes = case @order.order_status
+              when 'pending' then 'bg-gray-100 text-gray-800'
+              when 'paid' then 'bg-blue-100 text-blue-800'
+              when 'preparing' then 'bg-yellow-100 text-yellow-800'
+              when 'shipped' then 'bg-teal-100 text-teal-800'
+              when 'delivered' then 'bg-green-100 text-green-800'
+              when 'canceled' then 'bg-red-100 text-red-800'
+              when 'returned' then 'bg-purple-100 text-purple-800'
+              else 'bg-gray-100 text-gray-800'
+              end %>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_classes %>">
+              <%= @order.order_status.humanize %>
+            </span>
           </p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">마켓플레이스</label>
-          <p class="mt-1 text-sm text-gray-900"><%= @order.marketplace.humanize %></p>
+          <label class="block text-sm font-medium text-gray-500">마켓플레이스</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @order.marketplace_platform.humanize %></p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">총 금액</label>
+          <label class="block text-sm font-medium text-gray-500">총 금액</label>
           <p class="mt-1 text-2xl font-bold text-gray-900">
             <%= number_to_currency(@order.total_amount_krw / 100.0, precision: 0, unit: '₩') %>
           </p>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <% if @order.shipping_memo.present? %>
           <div>
-            <label class="block text-sm font-medium text-gray-700">배송비</label>
-            <p class="mt-1 text-sm text-gray-900">
-              <%= number_to_currency(@order.shipping_fee_krw / 100.0, precision: 0, unit: '₩') %>
-            </p>
+            <label class="block text-sm font-medium text-gray-500">배송 메모</label>
+            <p class="mt-1 text-sm text-gray-900"><%= @order.shipping_memo %></p>
           </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700">관세</label>
-            <p class="mt-1 text-sm text-gray-900">
-              <%= number_to_currency(@order.duty_amount_krw / 100.0, precision: 0, unit: '₩') %>
-            </p>
-          </div>
-        </div>
+        <% end %>
       </div>
 
-      <!-- 고객 정보 -->
+      <!-- 구매자 정보 (암호화) -->
       <div class="space-y-4">
-        <h3 class="text-lg font-semibold text-gray-900">고객 정보</h3>
+        <h3 class="text-lg font-semibold text-gray-900">구매자 정보</h3>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">이름</label>
-          <p class="mt-1 text-sm text-gray-900"><%= @order.customer_name || '-' %></p>
+          <label class="block text-sm font-medium text-gray-500">구매자명</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @order.buyer_name_ciphertext.present? ? '(암호화됨)' : '-' %></p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">이메일</label>
-          <p class="mt-1 text-sm text-gray-900"><%= @order.customer_email %></p>
+          <label class="block text-sm font-medium text-gray-500">연락처</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @order.buyer_contact_ciphertext.present? ? '(암호화됨)' : '-' %></p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">연락처</label>
-          <p class="mt-1 text-sm text-gray-900"><%= @order.customer_phone || '-' %></p>
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">배송지</label>
-          <p class="mt-1 text-sm text-gray-900"><%= @order.shipping_address || '-' %></p>
+          <label class="block text-sm font-medium text-gray-500">배송지</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @order.buyer_address_ciphertext.present? ? '(암호화됨)' : '-' %></p>
         </div>
       </div>
     </div>
@@ -130,38 +102,47 @@
     <h3 class="text-lg font-semibold text-gray-900">주문 항목</h3>
   </div>
 
-  <div class="p-6">
+  <div class="overflow-x-auto">
     <% if @items.any? %>
-      <div class="space-y-4">
-        <% @items.each do |item| %>
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div class="flex items-center">
-              <div class="h-12 w-12 rounded bg-gray-200 flex items-center justify-center mr-4">
-                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-gray-900">
-                  <%= item.catalog_product&.translated_title || '알 수 없는 제품' %>
-                </p>
-                <p class="text-sm text-gray-500">수량: <%= item.quantity %></p>
-              </div>
-            </div>
-
-            <div class="text-right">
-              <p class="text-sm font-medium text-gray-900">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제품</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">수량</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">단가</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">소계</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @items.each do |item| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4">
+                <div class="text-sm font-medium text-gray-900">
+                  <%= item.product_name_snapshot %>
+                </div>
+                <% if item.catalog_product %>
+                  <div class="text-xs text-gray-500">
+                    <%= link_to '카탈로그 보기', admin_catalog_product_path(item.catalog_product), class: 'text-blue-600 hover:text-blue-800' %>
+                  </div>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <%= item.quantity %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <%= number_to_currency(item.unit_price_krw / 100.0, precision: 0, unit: '₩') %>
-              </p>
-              <p class="text-xs text-gray-500">
-                소계: <%= number_to_currency((item.unit_price_krw * item.quantity) / 100.0, precision: 0, unit: '₩') %>
-              </p>
-            </div>
-          </div>
-        <% end %>
-      </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium text-right">
+                <%= number_to_currency((item.unit_price_krw * item.quantity) / 100.0, precision: 0, unit: '₩') %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     <% else %>
-      <p class="text-sm text-gray-500 text-center py-4">주문 항목이 없습니다.</p>
+      <div class="p-6 text-center">
+        <p class="text-sm text-gray-500">주문 항목이 없습니다.</p>
+      </div>
     <% end %>
   </div>
 </div>
@@ -174,19 +155,17 @@
 
   <div class="p-6">
     <% if @shipment %>
-      <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-6">
         <div>
-          <label class="block text-sm font-medium text-gray-700">배송사</label>
-          <p class="mt-1 text-sm text-gray-900"><%= @shipment.carrier || '-' %></p>
+          <label class="block text-sm font-medium text-gray-500">배송사</label>
+          <p class="mt-1 text-sm text-gray-900"><%= @shipment.shipping_provider.humanize %></p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">송장번호</label>
+          <label class="block text-sm font-medium text-gray-500">송장번호</label>
           <p class="mt-1 text-sm text-gray-900">
             <% if @shipment.tracking_number.present? %>
-              <%= link_to @shipment.tracking_number, "https://tracker.delivery/#/#{@shipment.tracking_number}",
-                  target: '_blank',
-                  class: 'text-blue-600 hover:text-blue-900' %>
+              <span class="text-blue-600 font-mono"><%= @shipment.tracking_number %></span>
             <% else %>
               -
             <% end %>
@@ -194,16 +173,25 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">배송일</label>
+          <label class="block text-sm font-medium text-gray-500">발송일</label>
           <p class="mt-1 text-sm text-gray-900">
             <%= @shipment.shipped_at&.strftime('%Y-%m-%d %H:%M') || '-' %>
           </p>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700">배송 상태</label>
-          <p class="mt-1 text-sm text-gray-900">
-            <%= @shipment.status.humanize %>
+          <label class="block text-sm font-medium text-gray-500">배송 상태</label>
+          <p class="mt-1">
+            <% ship_status_classes = case @shipment.shipping_status
+              when 'ready' then 'bg-gray-100 text-gray-800'
+              when 'in_transit' then 'bg-blue-100 text-blue-800'
+              when 'delivered' then 'bg-green-100 text-green-800'
+              when 'exception' then 'bg-red-100 text-red-800'
+              else 'bg-gray-100 text-gray-800'
+              end %>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= ship_status_classes %>">
+              <%= @shipment.shipping_status.humanize %>
+            </span>
           </p>
         </div>
       </div>

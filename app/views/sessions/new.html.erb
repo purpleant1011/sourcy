@@ -1,31 +1,131 @@
-<div class="mx-auto md:w-2/3 w-full">
-  <% if alert = flash[:alert] %>
-    <p class="py-2 px-3 bg-red-50 mb-5 text-red-500 font-medium rounded-lg inline-block" id="alert"><%= alert %></p>
-  <% end %>
+<% content_for(:title) { "로그인 - Sourcy" } %>
 
-  <% if notice = flash[:notice] %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"><%= notice %></p>
-  <% end %>
-
-  <h1 class="font-bold text-4xl">Sign in</h1>
-
-  <%= form_with url: session_url, class: "contents" do |form| %>
-    <div class="my-5">
-      <%= form.email_field :email, required: true, autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email], class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+<div class="min-h-screen flex">
+  <!-- Left: Branding Panel -->
+  <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);">
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500 rounded-full blur-3xl"></div>
     </div>
 
-    <div class="my-5">
-      <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Enter your password", maxlength: 72, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
-    </div>
-
-    <div class="col-span-6 sm:flex sm:items-center sm:gap-4">
-      <div class="inline">
-        <%= form.submit "Sign in", class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+    <div class="relative flex flex-col justify-center px-16 xl:px-20">
+      <!-- Logo -->
+      <div class="flex items-center gap-3 mb-12">
+        <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
+          <span class="text-white font-bold text-xl">S</span>
+        </div>
+        <span class="text-white font-bold text-2xl">Sourcy</span>
       </div>
 
-      <div class="mt-4 text-sm text-gray-500 sm:mt-0">
-        <%= link_to "Forgot password?", new_password_path, class: "text-gray-700 underline hover:no-underline" %>
+      <h2 class="text-3xl xl:text-4xl font-bold text-white leading-tight mb-6">
+        해외 소싱,<br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">더 쉽고 빠르게</span>
+      </h2>
+
+      <p class="text-slate-300 text-lg leading-relaxed mb-10 max-w-md">
+        중국·해외 상품을 수집하고 번역해서 네이버, 쿠팡, 11번가에 자동으로 등록하세요.
+      </p>
+
+      <!-- Feature List -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <span class="text-slate-300">Chrome Extension 1클릭 수집</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <span class="text-slate-300">AI 자동 번역 및 SEO 최적화</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+          <span class="text-slate-300">3개 마켓플레이스 동시 등록</span>
+        </div>
       </div>
     </div>
-  <% end %>
+  </div>
+
+  <!-- Right: Login Form -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 bg-white">
+    <div class="w-full max-w-md">
+      <!-- Mobile Logo -->
+      <div class="flex items-center gap-3 mb-8 lg:hidden">
+        <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
+          <span class="text-white font-bold text-xl">S</span>
+        </div>
+        <span class="text-slate-900 font-bold text-2xl">Sourcy</span>
+      </div>
+
+      <!-- Flash Messages -->
+      <% if alert = flash[:alert] %>
+        <div class="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-6" id="alert">
+          <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <p class="text-red-700 text-sm font-medium"><%= alert %></p>
+        </div>
+      <% end %>
+
+      <% if notice = flash[:notice] %>
+        <div class="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-6" id="notice">
+          <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <p class="text-green-700 text-sm font-medium"><%= notice %></p>
+        </div>
+      <% end %>
+
+      <!-- Heading -->
+      <h1 class="text-2xl lg:text-3xl font-bold text-slate-900 mb-2">Sourcy에 로그인</h1>
+      <p class="text-slate-500 mb-8">계정 정보를 입력해주세요</p>
+
+      <!-- Login Form -->
+      <%= form_with url: session_url, class: "space-y-5" do |form| %>
+        <div>
+          <label for="email" class="block text-sm font-medium text-slate-700 mb-1.5">이메일</label>
+          <%= form.email_field :email,
+            required: true,
+            autofocus: true,
+            autocomplete: "username",
+            placeholder: "name@company.com",
+            value: params[:email],
+            class: "block w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 px-4 py-3 text-slate-900 placeholder:text-slate-400 transition-all duration-200 outline-none" %>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="password" class="block text-sm font-medium text-slate-700">비밀번호</label>
+            <%= link_to "비밀번호 찾기", new_password_path, class: "text-sm text-blue-600 hover:text-blue-500 font-medium" %>
+          </div>
+          <%= form.password_field :password,
+            required: true,
+            autocomplete: "current-password",
+            placeholder: "비밀번호를 입력하세요",
+            maxlength: 72,
+            class: "block w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 px-4 py-3 text-slate-900 placeholder:text-slate-400 transition-all duration-200 outline-none" %>
+        </div>
+
+        <div class="pt-2">
+          <%= form.submit "로그인", class: "w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3.5 px-6 rounded-xl text-base transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-600/25 cursor-pointer" %>
+        </div>
+      <% end %>
+
+      <!-- Footer -->
+      <div class="mt-8 pt-6 border-t border-slate-200 text-center">
+        <p class="text-slate-500 text-sm">
+          아직 계정이 없으신가요?
+          <span class="text-slate-700 font-medium">관리자에게 문의하세요</span>
+        </p>
+      </div>
+
+      <!-- Back to Home -->
+      <div class="mt-6 text-center">
+        <%= link_to root_path, class: "inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          홈으로 돌아가기
+        <% end %>
+      </div>
+    </div>
+  </div>
 </div>
