@@ -24,7 +24,9 @@ module Admin
       end
 
       # 페이지네이션 (cursor-based using pagy)
-      @catalog_products = @catalog_products.order(created_at: :desc).page(params[:page] || 1).per(20)
+      # 페이지네이션
+      page = (params[:page] || 1).to_i
+      @pagy, @catalog_products = pagy(@catalog_products.order(created_at: :desc), limit: 20, page: page)
     end
 
     def show

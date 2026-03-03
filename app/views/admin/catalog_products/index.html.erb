@@ -166,20 +166,16 @@
     <!-- 페이지네이션 -->
     <div class="bg-white px-4 py-3 border-t border-gray-200 flex items-center justify-between">
       <div class="text-sm text-gray-700">
-        총 <%= @catalog_products.total_count %>개 중 <%= @catalog_products.offset_value + 1 %> - <%= [@catalog_products.offset_value + @catalog_products.length, @catalog_products.total_count].min %>개 표시
+        총 <%= @pagy.count %>개 중 <%= @pagy.from %> - <%= @pagy.to %>개 표시
       </div>
-
       <div class="flex gap-2">
-        <% unless @catalog_products.first_page? %>
-          <%= link_to '이전', url_for(page: params[:page].to_i - 1, status: params[:status], search: params[:search]),
-              class: 'px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50',
-              data: { turbo_frame: 'catalog_products' } %>
+        <% if @pagy.prev %>
+          <%= link_to '이전', url_for(page: @pagy.prev, status: params[:status], search: params[:search]),
+              class: 'px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50' %>
         <% end %>
-
-        <% unless @catalog_products.last_page? %>
-          <%= link_to '다음', url_for(page: params[:page].to_i + 1, status: params[:status], search: params[:search]),
-              class: 'px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50',
-              data: { turbo_frame: 'catalog_products' } %>
+        <% if @pagy.next %>
+          <%= link_to '다음', url_for(page: @pagy.next, status: params[:status], search: params[:search]),
+              class: 'px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-50' %>
         <% end %>
       </div>
     </div>

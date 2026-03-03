@@ -2,8 +2,10 @@
 
 module Admin
   class BaseController < ApplicationController
+    include Pagy::Backend
     layout "admin"
-    allow_unauthenticated_access
+    skip_before_action :authenticate
+    skip_before_action :set_current_account
     before_action :require_basic_auth
 
     private
@@ -17,13 +19,9 @@ module Admin
         expected_pass = ENV.fetch("ADMIN_PASSWORD", "password") if expected_pass.blank?
 
         authenticated = ActiveSupport::SecurityUtils.secure_compare(username, expected_user) &&
-                       ActiveSupport::SecurityUtils.secure_compare(password, expected_pass)
+                        ActiveSupport::SecurityUtils.secure_compare(password, expected_pass)
 
-        if authenticated
-          # 관리자 인증 후 Current.account 설정 (첫 번째 계정 또는 nil)
-          Current.account = Account.first
-        end
-
+        Current.account = Account.first if authenticated
         authenticated
       end
     end

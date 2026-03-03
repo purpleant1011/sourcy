@@ -20,7 +20,7 @@ module Admin
       end
 
       if params[:status].present?
-        @orders = @orders.where(status: params[:status])
+        @orders = @orders.where(order_status: params[:status])
       end
 
       # 날짜 범위 필터링
@@ -36,7 +36,9 @@ module Admin
       end
 
       # 페이지네이션
-      @orders = @orders.order(created_at: :desc).page(params[:page] || 1).per(20)
+      # 페이지네이션
+      page = (params[:page] || 1).to_i
+      @pagy, @orders = pagy(@orders.order(created_at: :desc), limit: 20, page: page)
     end
 
     def show

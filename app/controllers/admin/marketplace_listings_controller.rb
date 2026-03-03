@@ -8,7 +8,12 @@ module Admin
     before_action :set_listing, only: [:show, :edit, :update, :destroy]
 
     def index
-      @listings = Current.account ? Current.account.marketplace_listings : MarketplaceListing.all
+      @listings = if Current.account
+                    MarketplaceListing.joins(:marketplace_account)
+                                      .where(marketplace_accounts: { account_id: Current.account.id })
+                  else
+                    MarketplaceListing.all
+                  end
 
       # 필터링
       if params[:search].present?
@@ -29,7 +34,9 @@ module Admin
       end
 
       # 페이지네이션
-      @listings = @listings.order(created_at: :desc).page(params[:page] || 1).per(20)
+      # 페이지네이션
+      page = (params[:page] || 1).to_i
+      @pagy, @listings = pagy(@listings.order(created_at: :desc), limit: 20, page: page)
     end
 
     def show

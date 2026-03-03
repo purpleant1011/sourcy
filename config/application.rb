@@ -28,9 +28,9 @@ module Sourcy
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
-    config.active_record.encryption.primary_key = Rails.application.credentials.dig(:active_record_encryption, :primary_key)
-    config.active_record.encryption.deterministic_key = Rails.application.credentials.dig(:active_record_encryption, :deterministic_key)
-    config.active_record.encryption.key_derivation_salt = Rails.application.credentials.dig(:active_record_encryption, :key_derivation_salt)
+    config.active_record.encryption.primary_key = Rails.application.credentials.dig(:active_record_encryption, :primary_key) || ENV.fetch("AR_ENCRYPTION_PRIMARY_KEY", "dev_primary_key_for_local_only_32b")
+    config.active_record.encryption.deterministic_key = Rails.application.credentials.dig(:active_record_encryption, :deterministic_key) || ENV.fetch("AR_ENCRYPTION_DETERMINISTIC_KEY", "dev_deterministic_key_local_32bc")
+    config.active_record.encryption.key_derivation_salt = Rails.application.credentials.dig(:active_record_encryption, :key_derivation_salt) || ENV.fetch("AR_ENCRYPTION_SALT", "dev_key_derivation_salt_local32x")
 
     # Configuration for the application, engines, and railties goes here.
     #

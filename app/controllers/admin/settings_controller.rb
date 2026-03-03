@@ -9,9 +9,11 @@ module Admin
       if @account
         @memberships = @account.memberships.includes(:user)
         @api_credentials = @account.api_credentials
+        @marketplace_accounts = @account.marketplace_accounts
       else
         @memberships = []
         @api_credentials = []
+        @marketplace_accounts = []
       end
     end
     def update
