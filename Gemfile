@@ -59,7 +59,7 @@ gem "pundit", "~> 2.4"
 gem "httpx"
 
 # Excel/CSV parsing
-gem "roo", "~> 2.10"
+gem "roo", "~> 3.0"
 
 # Charts
 gem "chartkick"
