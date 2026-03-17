@@ -50,7 +50,7 @@ gem "omniauth-naver"
 gem "omniauth-google-oauth2", "~> 1.1"
 gem "jwt", "~> 2.8"
 gem "rotp", "~> 6.3"
-gem "rqrcode", "~> 2.2"
+gem "rqrcode", "~> 3.2"
 
 # Authorization
 gem "pundit", "~> 2.4"
