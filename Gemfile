@@ -81,7 +81,7 @@ gem "ruby-vips", "~> 2.2"
 # gem "google-cloud-vision", "~> 2.0"
 # gem "google-cloud-translate", "~> 2.0"
 # Monitoring
-gem "google-cloud-translate", "~> 2.0"
+gem "google-cloud-translate", "~> 3.7"
 
 # Monitoring
 gem "sentry-ruby"
